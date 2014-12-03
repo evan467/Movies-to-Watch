@@ -43,19 +43,34 @@
 			<input type="text" class="form-control input-lg text-center" placeholder="Password" ng-model="formPassData.text">
 			<button type="submit" class="btn btn-primary btn-lg" ng-click="logon()">Enter</button>
 		</div>
-		
-		
-        <!-- MyMovie List LIST -->
-        <div id="movies-list" class="row">
-            <div class="col-sm-4">
-
-                <!-- Loop Movie Comments -->
-                <div class="checkbox" ng-repeat="movie in movies">
+		<div class = "text-center">
+			<h1> User Comments! </h1>
+		</div>
+		<div id="user-movies-list" class="row">
+            <div class="col-sm-20">			
+				<div class="checkbox" ng-repeat="userMovie in userMovies">
                     <label>
-                        <input type="checkbox" ng-click="deleteTodo(movie._id)"> {{ movie.text }}
+						<input type="checkbox" ng-click="deleteMovie(userMovie._id)"> 
+                          {{ userMovie.name }} | Public Comment: {{ userMovie.publicC}} | Private Comment: {{ userMovie.privateC}} | Status: {{userMovie.status}}
                     </label>
                 </div>
-
+            </div>
+        </div>
+		
+        <!-- MyMovie List LIST -->
+		<div class = "text-center">
+			<h1> All Movie Comments! </h1>
+		</div>
+        <div id="movies-list" class="row">
+            <div class="col-sm-4">			
+				<div class="checkbox" ng-repeat="movie in movies">
+                    <label>
+					
+                        
+                    
+                          {{ movie.user }} comments on {{ movie.name }} : {{ movie.publicC}}
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -77,10 +92,10 @@
 				</label>
             </div>
         </div>
-		<div id="comment-section" class = "row">
+		<div id="comment-section" class = "row text-center">
 			<input type="text" class="form-control input-lg text-center" placeholder="Public Comment" ng-model="publicCom.text">
 			<input type="text" class="form-control input-lg text-center" placeholder="Private Comment" ng-model="privateCom.text">
-			<button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+			<button type="submit" class="btn btn-primary btn-lg" ng-click="createMovie()">Add</button>
 		</div>
 
     </div>

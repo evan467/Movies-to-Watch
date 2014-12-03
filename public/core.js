@@ -9,6 +9,7 @@ function mainController($scope, $http) {
 	//var movieTextHold = "Movie Data!';
     $scope.formData = {};
 	var currentUserName = "No User!";
+	var currentMovie = "null";
 	$scope.currentUserName = currentUserName;
     // when landing on the page, get all Movies and show them
     $http.get('/api/movies')
@@ -22,24 +23,59 @@ function mainController($scope, $http) {
         });
 
     // when submitting the add form, send the text to the node API
-    $scope.createTodo = function() {
-        $http.post('/api/movies', $scope.formData)
-            .success(function(data) {
-                $scope.formData = {}; // clear the form so our user is ready to enter another
-                $scope.movies = data;
-                console.log(data);
-            })
-            .error(function(data) {
-                console.log('Error: ' + data);
-            });
+    $scope.createMovie = function() {
+		if(currentUserName == "No User!"){
+			alert("Sign in!");
+		}
+		else if(currentMovie == "null"){
+			alert("Get a movie!");
+		}
+		else{
+			var jsonInsert = {
+				user : currentUserName,
+				name : currentMovie,
+				publicC : $scope.publicCom.text,
+				privateC : $scope.privateCom.text
+			}
+			
+			$http.post('/api/movies', jsonInsert)
+				.success(function(data) {
+					$scope.formData = {}; // clear the form so our user is ready to enter another
+					$scope.movies = data;
+					console.log(data);
+				})
+				.error(function(data) {
+					console.log('Error: ' + data);
+				});
+			$http.post('/api/movies/user',{
+					user: currentUserName
+					}).success(function(data){						
+						$scope.userMovies = data;
+					})
+					.error(function(data){
+						alert(data);
+					});	
+		}
     };
 
     // delete a movie after checking it
-    $scope.deleteTodo = function(id) {
+    $scope.deleteMovie = function(id) {
         $http.delete('/api/movies/' + id)
             .success(function(data) {
-                $scope.movies = data;
+                $scope.userMovies = data;
                 console.log(data);
+				
+				$http.get('/api/movies')
+					.success(function(data) {
+						$scope.movies = data;
+						console.log(data);
+						
+					})
+					.error(function(data) {
+						console.log('Error: ' + data);
+					});
+				
+				
             })
             .error(function(data) {
                 console.log('Error: ' + data);
@@ -57,6 +93,7 @@ function mainController($scope, $http) {
 				else{
 					alert("Successful search");
 					var createText = data.Title + ": \n STARS: " + data.Actors + " \n PLOT: " + data.Plot;
+					currentMovie = data.Title;
 					$scope.movieData = createText;
 					alert(createText);
 				}
@@ -78,6 +115,15 @@ function mainController($scope, $http) {
 			if(data != "Wrong password!"){
 				currentUserName = $scope.formUserData.text;
 				$scope.currentUserName = currentUserName;
+				$http.post('/api/movies/user',{
+					user: currentUserName
+					}).success(function(data){						
+						$scope.userMovies = data;
+					})
+					.error(function(data){
+						alert(data);
+					});
+				
 			}
 		})
 		.error(function(data){

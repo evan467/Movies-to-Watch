@@ -22,14 +22,14 @@
     app.use(methodOverride());
 	
 	//define the models
-	//Movie Model
+	//User Movie Model/List
 	var Movie = mongoose.model('Movie', {
-		text: String,
-		movies : [{
-			publicC: String,
-			privateC: String,
-			rating : String
-		}]
+		user: String,
+		name : String,
+		publicC: String,
+		privateC: String,
+		status: String
+		
 	});
 	//User Model
 	var User = mongoose.model('User', {
@@ -117,7 +117,7 @@
 	});
 	
     // api Movies 
-    // get all Movies
+    // get all Movies Comments
     app.get('/api/movies', function(req, res) {
         // use mongoose to get all movies in the database
         Movie.find(function(err, movies) {
@@ -127,13 +127,28 @@
             res.json(movies); // return all movies in JSON format
         });
     });
+	
+	//get all movies by user
+	app.post('/api/movies/user', function(req, res) {
+        // use mongoose to get all movies in the database
+        Movie.find({'user' : req.body.user} ,function(err, movies) {
+            // err
+            if (err)
+                res.send(err)
+			console.log(movies.length);
+            res.json(movies); // return all movies in JSON format
+        });
+    });
 
     // create Movie and send back all movies after creation
     app.post('/api/movies', function(req, res) {
         // create a movie comment, information comes from AJAX request from Angular
         Movie.create({
-            text : req.body.text,
-            done : false
+            user : req.body.user,
+			name : req.body.name,
+			publicC : req.body.publicC,
+			privateC : req.body.privateC,
+			status: "to-be-watched"
         }, function(err, movies) {
             if (err)
                 res.send(err);
@@ -157,11 +172,13 @@
                 res.send(err);
 
             // get and return all the Movies after you create another
-            Movie.find(function(err, movies) {
-                if (err)
-                    res.send(err)
-                res.json(movies);
-            });
+            Movie.find({'user' : req.body.user} ,function(err, movies) {
+            // err
+            if (err)
+                res.send(err)
+			console.log(movies.length);
+            res.json(movies); // return all movies in JSON format
+        });
         });
     });
 
@@ -178,7 +195,7 @@
 				}
 			}
 			console.log("Request Started");
-			var sendURL = 'https://www.omdbapi.com/?t='+inputText+'&y=&plot=short&r=json';
+			var sendURL = 'http://www.omdbapi.com/?t='+inputText+'&y=&plot=short&r=json';
 			console.log(sendURL);
 			//'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=8mkbcbhtencmgcnkujsm5b4k&q='+inputText+ '&page_limit=1'
 			request(sendURL, function (error, response, body) {
@@ -189,20 +206,7 @@
 })
 			 
 	});
-	 callback = function(response) {
-		  var str = '';
-
-		  //another chunk of data has been recieved, so append it to `str`
-		  response.on('data', function (chunk) {
-			str += chunk;
-		  });
-
-		  //the whole response has been recieved, so we just print it out here
-		  response.on('end', function () {
-			console.log(str);
-		  });
-	}
-	//user API
+	
 	
 	
 	
