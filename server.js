@@ -8,8 +8,9 @@
     var bodyParser = require('body-parser');    // pull information from HTML POST (express4)
     var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 	var http = require('http');
+	var request = require('request');
 
-    // configuration =================
+    // configuration 
 
     mongoose.connect('mongodb://test:test@ds055680.mongolab.com:55680/3316_lab_4');     // connect to mongoDB database on modulus.io
 
@@ -20,33 +21,116 @@
     app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
     app.use(methodOverride());
 	
-	//define the model
+	//define the models
+	//Movie Model
 	var Movie = mongoose.model('Movie', {
-		text: String
+		text: String,
+		movies : [{
+			publicC: String,
+			privateC: String,
+			rating : String
+		}]
+	});
+	//User Model
+	var User = mongoose.model('User', {
+		name : String,
+		pass : String
 	});
 	
 	//routes
-	// routes ======================================================================
-
-    // api ---------------------------------------------------------------------
-    // get all Movies
-    app.get('/api/movies', function(req, res) {
-
-        // use mongoose to get all movies in the database
-        Movie.find(function(err, movies) {
-
-            // if there is an error retrieving, send the error. nothing after res.send(err) will execute
+	//User Routes
+	//Get all users
+	app.get('/users',function(req,res){
+		User.find(function(err,users){
+			if (err)
+                res.send(err)
+            res.json(users);
+		});
+	});
+	//Create user
+	app.post('/users/create',function(req,res){
+		//Check if there already is this user
+		var alreadyCreated = false;
+		User.find(function(err, users) {
+            // err
             if (err)
                 res.send(err)
-
+            
+			for(i=0;i < users.length;i++){
+				if(users[i].name == req.body.username){
+						alreadyCreated = true;
+						console.log("There is already a user with this name!");
+						break;
+				}
+			}
+			console.log(alreadyCreated);
+		//otherwise create
+			if(alreadyCreated == true){
+				res.send("Already have a user with this name!");
+			}
+			else{
+				User.create({
+					name : req.body.username,
+					pass : req.body.pass
+				}, function(err,users){
+					if(err)
+						res.send(err);
+					res.send("User created");
+				});
+			}
+			
+        });
+		
+		
+	});
+	
+	//log user on
+	app.post('/users/logon/', function(req,res){
+		var loggedOn = false;
+		var wrongPass = false;
+		console.log(req.body.username);
+		User.find(function(err,users){
+			for(i=0;i < users.length;i++){
+				if(users[i].name == req.body.username && users[i].pass == req.body.pass){
+						res.send("Logged on!");
+						loggedOn = true;
+						break;
+				}
+				else if(users[i].name == req.body.username && users[i].pass != req.body.pass){
+					res.send("Wrong password!");
+					wrongPass = true;
+					break;
+				}
+			}
+			if(loggedOn == false && wrongPass == false){
+				
+				User.create({
+					name : req.body.username,
+					pass : req.body.pass
+				}, function(err,users){
+					if(err)
+						res.send(err);
+					res.send("No user/password combination found, creating user!");
+				});
+			}
+		});
+	});
+	
+    // api Movies 
+    // get all Movies
+    app.get('/api/movies', function(req, res) {
+        // use mongoose to get all movies in the database
+        Movie.find(function(err, movies) {
+            // err
+            if (err)
+                res.send(err)
             res.json(movies); // return all movies in JSON format
         });
     });
 
     // create Movie and send back all movies after creation
     app.post('/api/movies', function(req, res) {
-
-        // create a movie, information comes from AJAX request from Angular
+        // create a movie comment, information comes from AJAX request from Angular
         Movie.create({
             text : req.body.text,
             done : false
@@ -54,7 +138,7 @@
             if (err)
                 res.send(err);
 
-            // get and return all the todos after you create another
+            // get and return all the movie comments after you create another
             Movie.find(function(err, movies) {
                 if (err)
                     res.send(err)
@@ -64,7 +148,7 @@
 
     });
 
-    // delete a movie
+    // delete a movie comment
     app.delete('/api/movies/:movie_id', function(req, res) {
         Movie.remove({
             _id : req.params.movie_id
@@ -80,12 +164,10 @@
             });
         });
     });
-	//Send to front end
-	app.get('*', function(req, res) {
-        res.sendfile('./public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
-    });
-	
+
+	//query OMDB
 	app.post('/moviequery', function(req,res){
+			//Create the text used to query
 			var text = req.body.text;
 			var holdText = text.split(" ");
 			var inputText = "";
@@ -95,18 +177,18 @@
 					inputText += "+";
 				}
 			}
-			 var sendOptions = {
-				host : 'api.rottentomatoes.com',
-				path: '/api/public/v1.0/movies.json?apikey=8mkbcbhtencmgcnkujsm5b4k&q='+inputText+ '&page_limit=1'
-			 };
-		http.request(sendOptions, function(err, movies) {
-            if (err)
-                res.send(err);
-			res.json(movies);	
-			});
+			console.log("Request Started");
+			var sendURL = 'https://www.omdbapi.com/?t='+inputText+'&y=&plot=short&r=json';
+			console.log(sendURL);
+			//'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=8mkbcbhtencmgcnkujsm5b4k&q='+inputText+ '&page_limit=1'
+			request(sendURL, function (error, response, body) {
+			if (!error) {
+				console.log(body) // Print the response to console.
+				res.send(body);
+			}
+})
+			 
 	});
-	
-	
 	 callback = function(response) {
 		  var str = '';
 
@@ -120,8 +202,14 @@
 			console.log(str);
 		  });
 	}
-
+	//user API
 	
+	
+	
+	//Send to front end
+	app.get('*', function(req, res) {
+        res.sendfile('./public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
+    });
 	
 	
     // listen (start app with node server.js) ======================================

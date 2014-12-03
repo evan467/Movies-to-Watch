@@ -2,7 +2,7 @@
 <!doctype html>
 
 <!-- ASSIGN ANGULAR MODULE -->
-<html ng-app="scotchTodo">
+<html ng-app="movieScreen">
 <head>
     <!-- META -->
     <meta charset="utf-8">
@@ -15,7 +15,7 @@
     <style>
         html                    { overflow-y:scroll; }
         body                    { padding-top:50px; }
-        #todo-list              { margin-bottom:30px; }
+        #movie-list              { margin-bottom:30px; }
     </style>
 
     <!-- SPELLS -->
@@ -32,19 +32,24 @@
         <div class="jumbotron text-center">
             <h1>Search Movies! </h1>
         </div>
+		<div class = "text-center">
+			<label id="currUser" ng-model="currentUser">
+					Current User: <span ng-bind="currentUserName"></span>
+			</label>
+		</div>
 		<div class="text-center">
-			<h1> Enter username and password to save! </h1>
+			<h1> Enter username to add comments! </h1>
 			<input type="text" class="form-control input-lg text-center" placeholder="Username" ng-model="formUserData.text">
 			<input type="text" class="form-control input-lg text-center" placeholder="Password" ng-model="formPassData.text">
 			<button type="submit" class="btn btn-primary btn-lg" ng-click="logon()">Enter</button>
 		</div>
 		
 		
-        <!-- Movie List LIST -->
-        <div id="todo-list" class="row">
+        <!-- MyMovie List LIST -->
+        <div id="movies-list" class="row">
             <div class="col-sm-4">
 
-                <!-- LOOP OVER THE TODOS IN $scope.todos -->
+                <!-- Loop Movie Comments -->
                 <div class="checkbox" ng-repeat="movie in movies">
                     <label>
                         <input type="checkbox" ng-click="deleteTodo(movie._id)"> {{ movie.text }}
@@ -54,8 +59,8 @@
             </div>
         </div>
 
-        <!-- FORM TO CREATE TODOS -->
-        <div id="todo-form" class="row">
+        <!-- Movie search Form  -->
+        <div id="movie-form" class="row">
             <div class="col-sm-8 col-sm-offset-2 text-center">
                 <form>
                     <div class="form-group">
@@ -64,12 +69,19 @@
                         <input type="text" class="form-control input-lg text-center" placeholder="Movies!" ng-model="formData.text">
                     </div>
 
-                    <!-- createToDo() WILL CREATE NEW TODOS -->
+                    <!-- Searchs the movies-->
 					<button type="submit" class="btn btn-primary btn-lg" ng-click="search()">Search!</button>
-                    <button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
                 </form>
+				<label id="movieData" ng-model="movieFormText">
+					Movie Data: <span ng-bind="movieData"></span>
+				</label>
             </div>
         </div>
+		<div id="comment-section" class = "row">
+			<input type="text" class="form-control input-lg text-center" placeholder="Public Comment" ng-model="publicCom.text">
+			<input type="text" class="form-control input-lg text-center" placeholder="Private Comment" ng-model="privateCom.text">
+			<button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+		</div>
 
     </div>
 
