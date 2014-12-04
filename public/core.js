@@ -30,6 +30,9 @@ function mainController($scope, $http) {
 		else if(currentMovie == "null"){
 			alert("Get a movie!");
 		}
+		else if($scope.publicCom == null || $scope.privateCom ==null){
+			alert("Empty comments!");
+		}
 		else{
 			var jsonInsert = {
 				user : currentUserName,
@@ -57,13 +60,41 @@ function mainController($scope, $http) {
 					});	
 		}
     };
-
+	//update movie status
+	$scope.updateStatus = function(id){
+		$http.post('/api/movies/update/' +id)
+			.success(function(data){
+				console.log(data);
+				
+				$http.post('/api/movies/user',{
+					user: currentUserName
+					}).success(function(data){						
+						$scope.userMovies = data;
+					})
+					.error(function(data){
+						alert(data);
+					});
+			})
+			.error(function(data){
+				console.log("Error " + data);
+			});
+	};
+	
     // delete a movie after checking it
     $scope.deleteMovie = function(id) {
         $http.delete('/api/movies/' + id)
             .success(function(data) {
-                $scope.userMovies = data;
                 console.log(data);
+				
+				$http.post('/api/movies/user',{
+					user: currentUserName
+					}).success(function(data){						
+						$scope.userMovies = data;
+					})
+					.error(function(data){
+						alert(data);
+					});
+				
 				
 				$http.get('/api/movies')
 					.success(function(data) {
@@ -81,6 +112,45 @@ function mainController($scope, $http) {
                 console.log('Error: ' + data);
             });
     };
+	//add a movie another user has on their list to yours
+	$scope.addToMine = function(movieToAdd){
+		if(currentUserName == "No User!"){
+			alert("Sign in!");
+		}
+		else if(movieToAdd.user == currentUserName){
+			alert("Already in your list!");
+		}
+		else if($scope.publicCom == null || $scope.privateCom ==null){
+			alert("Empty comments!");
+		}
+		else{
+			var jsonInsert = {
+				user : currentUserName,
+				name : movieToAdd.name,
+				publicC : $scope.publicCom.text,
+				privateC : $scope.privateCom.text
+			}
+			
+			$http.post('/api/movies', jsonInsert)
+				.success(function(data) {
+					$scope.formData = {}; 
+					$scope.movies = data;
+					console.log(data);
+				})
+				.error(function(data) {
+					console.log('Error: ' + data);
+				});
+			$http.post('/api/movies/user',{
+					user: currentUserName
+					}).success(function(data){						
+						$scope.userMovies = data;
+					})
+					.error(function(data){
+						alert(data);
+					});	
+		}
+	
+	}
 	
 	//Search movie database
 	$scope.search = function(){
@@ -95,7 +165,6 @@ function mainController($scope, $http) {
 					var createText = data.Title + ": \n STARS: " + data.Actors + " \n PLOT: " + data.Plot;
 					currentMovie = data.Title;
 					$scope.movieData = createText;
-					alert(createText);
 				}
 				
 			})

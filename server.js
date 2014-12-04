@@ -102,8 +102,8 @@
 					break;
 				}
 			}
+			//create new user if not found
 			if(loggedOn == false && wrongPass == false){
-				
 				User.create({
 					name : req.body.username,
 					pass : req.body.pass
@@ -142,13 +142,13 @@
 
     // create Movie and send back all movies after creation
     app.post('/api/movies', function(req, res) {
-        // create a movie comment, information comes from AJAX request from Angular
+        // create a movie comment
         Movie.create({
             user : req.body.user,
 			name : req.body.name,
 			publicC : req.body.publicC,
 			privateC : req.body.privateC,
-			status: "to-be-watched"
+			status: "to-be-watched" //default status
         }, function(err, movies) {
             if (err)
                 res.send(err);
@@ -162,7 +162,14 @@
         });
 
     });
-
+	//update a movie comment to watched
+	app.post('/api/movies/update/:movie_id',function(req,res){
+		Movie.update({_id : req.params.movie_id},{status : "Watched"},function(err,resp){
+			if (err)
+				res.send(err);
+			res.send("Update");
+		});
+	});
     // delete a movie comment
     app.delete('/api/movies/:movie_id', function(req, res) {
         Movie.remove({
@@ -176,7 +183,6 @@
             // err
             if (err)
                 res.send(err)
-			console.log(movies.length);
             res.json(movies); // return all movies in JSON format
         });
         });

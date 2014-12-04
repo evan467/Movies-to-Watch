@@ -6,11 +6,11 @@
 <head>
     <!-- META -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Optimize mobile viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Movies to Watch</title>
 
-    <!-- SCROLLS -->
+    <!-- CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"><!-- load bootstrap -->
     <style>
         html                    { overflow-y:scroll; }
@@ -18,17 +18,17 @@
         #movie-list              { margin-bottom:30px; }
     </style>
 
-    <!-- SPELLS -->
+    <!-- Scripts -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script><!-- load jquery -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script><!-- load angular -->
     <script src="core.js"></script>
 
 </head>
-<!-- SET THE CONTROLLER AND GET ALL TODOS -->
+<!-- Set Controller -->
 <body ng-controller="mainController">
     <div class="container">
 
-        <!-- HEADER AND TODO COUNT -->
+        <!-- Title -->
         <div class="jumbotron text-center">
             <h1>Search Movies! </h1>
         </div>
@@ -52,23 +52,22 @@
                     <label>
 						<input type="checkbox" ng-click="deleteMovie(userMovie._id)"> 
                           {{ userMovie.name }} | Public Comment: {{ userMovie.publicC}} | Private Comment: {{ userMovie.privateC}} | Status: {{userMovie.status}}
+						  <button type="submit" class="btn btn-primary btn-sm" ng-click="updateStatus(userMovie._id)">Watched?</button>
                     </label>
                 </div>
             </div>
         </div>
 		
-        <!-- MyMovie List LIST -->
+        <!-- MyMovie List  -->
 		<div class = "text-center">
 			<h1> All Movie Comments! </h1>
 		</div>
         <div id="movies-list" class="row">
-            <div class="col-sm-4">			
+            <div class="col-sm-20">			
 				<div class="checkbox" ng-repeat="movie in movies">
-                    <label>
-					
-                        
-                    
+                    <label>                  
                           {{ movie.user }} comments on {{ movie.name }} : {{ movie.publicC}}
+						   <button type="submit" class="btn btn-primary btn-sm" ng-click="addToMine(movie)">Add to my List?</button>
                     </label>
                 </div>
             </div>
@@ -80,7 +79,7 @@
                 <form>
                     <div class="form-group">
 
-                        <!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+                        
                         <input type="text" class="form-control input-lg text-center" placeholder="Movies!" ng-model="formData.text">
                     </div>
 
